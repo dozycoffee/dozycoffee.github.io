@@ -18,8 +18,131 @@ import Logo from '../assets/logo.png';
 			>
 			<span>GitHub</span>
 		</a>
+		<button class="search-button" type="button" aria-label="검색" aria-haspopup="dialog">
+			<svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="none"
+				stroke="currentColor" stroke-width="2" stroke-linecap="round"
+				><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg
+			>
+		</button>
 	</nav>
+	<dialog class="search-dialog" aria-label="검색">
+		<form class="search-form" method="dialog">
+			<input
+				class="search-input"
+				type="search"
+				placeholder="제목, 설명, 태그로 검색"
+				autocomplete="off"
+				aria-label="검색어"
+			/>
+			<button class="search-close" type="submit">닫기</button>
+		</form>
+		<ul class="search-results"></ul>
+		<p class="search-empty" hidden>검색 결과가 없습니다.</p>
+	</dialog>
 </header>
+<script>
+	interface SearchItem {
+		url: string;
+		thumbnail: string;
+		title: string;
+		description: string;
+		author: string;
+		category: string;
+		tags: string[];
+	}
+
+	const button = document.querySelector<HTMLButtonElement>('.search-button')!;
+	const dialog = document.querySelector<HTMLDialogElement>('.search-dialog')!;
+	const input = dialog.querySelector<HTMLInputElement>('.search-input')!;
+	const results = dialog.querySelector<HTMLUListElement>('.search-results')!;
+	const empty = dialog.querySelector<HTMLParagraphElement>('.search-empty')!;
+
+	const RECENT_COUNT = 3;
+	let index: SearchItem[] | null = null;
+
+	async function loadIndex() {
+		if (!index) {
+			try {
+				index = await (await fetch('/search.json')).json();
+			} catch {
+				index = [];
+			}
+		}
+		return index!;
+	}
+
+	function render(items: SearchItem[], query: string) {
+		results.replaceChildren(
+			...items.map((item) => {
+				const li = document.createElement('li');
+				const a = document.createElement('a');
+				a.href = item.url;
+				const title = document.createElement('strong');
+				title.textContent = item.title;
+				const desc = document.createElement('span');
+				desc.textContent = item.description;
+				const text = document.createElement('div');
+				text.append(title, desc);
+				const thumb = document.createElement('img');
+				thumb.src = item.thumbnail;
+				thumb.alt = '';
+				a.append(text, thumb);
+				li.append(a);
+				return li;
+			}),
+		);
+		empty.hidden = items.length > 0 || query === '';
+	}
+
+	async function search() {
+		const query = input.value.trim().toLowerCase();
+		if (!query) return render((await loadIndex()).slice(0, RECENT_COUNT), '');
+		const terms = query.split(/\s+/);
+		const items = (await loadIndex()).filter((item) => {
+			const haystack = [item.title, item.description, item.author, item.category, ...item.tags]
+				.join(' ')
+				.toLowerCase();
+			return terms.every((term) => haystack.includes(term));
+		});
+		render(items, query);
+	}
+
+	button.addEventListener('click', () => {
+		dialog.showModal();
+		input.focus();
+		search();
+	});
+	input.addEventListener('input', search);
+	dialog.addEventListener('close', () => {
+		input.value = '';
+	});
+
+	// Play the slide-up animation before actually closing.
+	function closeDialog() {
+		if (dialog.classList.contains('closing')) return;
+		dialog.classList.add('closing');
+		if (getComputedStyle(dialog).animationName === 'none') {
+			dialog.dispatchEvent(new Event('animationend'));
+		}
+	}
+	dialog.addEventListener('animationend', (e) => {
+		if (e.target !== dialog || !dialog.classList.contains('closing')) return;
+		dialog.classList.remove('closing');
+		dialog.close();
+	});
+	// Esc: intercept the native close so the animation can run.
+	dialog.addEventListener('cancel', (e) => {
+		e.preventDefault();
+		closeDialog();
+	});
+	dialog.querySelector('form')!.addEventListener('submit', (e) => {
+		e.preventDefault();
+		closeDialog();
+	});
+	dialog.addEventListener('click', (e) => {
+		if (e.target === dialog) closeDialog();
+	});
+</script>
 <style>
 	header {
 		position: sticky;
@@ -33,6 +156,7 @@ import Logo from '../assets/logo.png';
 		display: flex;
 		align-items: center;
 		gap: 0.5em;
+		margin-right: auto;
 		text-decoration: none;
 	}
 	.brand img {
@@ -64,10 +188,164 @@ import Logo from '../assets/logo.png';
 		border-color: var(--accent);
 		color: var(--accent);
 	}
-	nav {
+	.search-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		margin-left: 0.5em;
+		padding: 0;
+		border: 1px solid rgb(var(--gray-light));
+		border-radius: 100px;
+		background: transparent;
+		color: rgb(var(--gray-dark));
+		cursor: pointer;
+		transition: 0.2s ease;
+	}
+	.search-button:hover {
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+	.search-dialog {
+		width: 600px;
+		max-width: calc(100% - 2em);
+		margin: 10vh auto auto;
+		padding: 0;
+		border: none;
+		border-radius: 16px;
+		box-shadow: var(--box-shadow);
+	}
+	.search-dialog[open] {
+		animation: search-slide-down 0.3s ease-out;
+	}
+	.search-dialog[open]::backdrop {
+		animation: search-fade-in 0.3s ease-out;
+	}
+	.search-dialog::backdrop {
+		background: rgba(var(--black), 40%);
+	}
+	.search-dialog.closing {
+		animation: search-slide-up 0.25s ease-in forwards;
+	}
+	.search-dialog.closing::backdrop {
+		animation: search-fade-out 0.25s ease-in forwards;
+	}
+	@keyframes search-slide-up {
+		to {
+			opacity: 0;
+			transform: translateY(-32px);
+		}
+	}
+	@keyframes search-fade-out {
+		to {
+			opacity: 0;
+		}
+	}
+	@keyframes search-slide-down {
+		from {
+			opacity: 0;
+			transform: translateY(-32px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+	@keyframes search-fade-in {
+		from {
+			opacity: 0;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.search-dialog[open],
+		.search-dialog[open]::backdrop,
+		.search-dialog.closing,
+		.search-dialog.closing::backdrop {
+			animation: none;
+		}
+	}
+	.search-form {
+		display: flex;
+		align-items: center;
+		gap: 0.5em;
+		padding: 1em 1.25em;
+		border-bottom: 1px solid rgb(var(--gray-light));
+	}
+	.search-input {
+		flex: 1;
+		min-width: 0;
+		border: none;
+		outline: none;
+		background: transparent;
+		color: rgb(var(--black));
+		font: inherit;
+		font-size: 18px;
+	}
+	.search-close {
+		border: none;
+		background: transparent;
+		color: rgb(var(--gray));
+		font: inherit;
+		font-size: 14px;
+		cursor: pointer;
+	}
+	.search-results {
+		max-height: 50vh;
+		margin: 0;
+		padding: 0.5em;
+		overflow-y: auto;
+		list-style: none;
+	}
+	.search-results:empty {
+		display: none;
+	}
+	.search-results :global(a) {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: 1em;
+		padding: 0.75em 1em;
+		border-radius: 12px;
+		text-decoration: none;
+	}
+	.search-results :global(a:hover),
+	.search-results :global(a:focus-visible) {
+		background: rgb(var(--gray-light));
+	}
+	.search-results :global(div) {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		min-width: 0;
+	}
+	.search-results :global(img) {
+		flex: none;
+		width: 120px;
+		height: 68px;
+		border-radius: 8px;
+		object-fit: cover;
+	}
+	.search-results :global(strong) {
+		color: rgb(var(--black));
+		font-size: 16px;
+	}
+	.search-results :global(span) {
+		overflow: hidden;
+		color: rgb(var(--gray));
+		font-size: 14px;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+	.search-empty {
+		margin: 0;
+		padding: 2em;
+		color: rgb(var(--gray));
+		text-align: center;
+	}
+	nav {
+		display: flex;
+		align-items: center;
 		width: 960px;
 		max-width: calc(100% - 2em);
 		margin: 0 auto;
