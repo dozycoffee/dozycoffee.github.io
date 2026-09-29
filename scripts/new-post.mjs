@@ -1,14 +1,21 @@
 #!/usr/bin/env node
-// npm run new-post -- "포스트 제목" ["작성자"]
+// npm run new-post -- "포스트 제목" "Tech|Project" ["작성자"]
 import { execSync } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const [, , titleArg, authorArg] = process.argv;
+const CATEGORIES = ['Tech', 'Project'];
 
-if (!titleArg) {
-	console.error('사용법: npm run new-post -- "포스트 제목" ["작성자"]');
+const [, , titleArg, categoryArg, authorArg] = process.argv;
+
+if (!titleArg || !categoryArg) {
+	console.error('사용법: npm run new-post -- "포스트 제목" "Tech|Project" ["작성자"]');
+	process.exit(1);
+}
+
+if (!CATEGORIES.includes(categoryArg)) {
+	console.error(`category는 ${CATEGORIES.join(' 또는 ')} 중 하나여야 합니다.`);
 	process.exit(1);
 }
 
@@ -53,6 +60,8 @@ const frontmatter = `---
 title: '${titleArg.replace(/'/g, "''")}'
 description: ''
 author: '${author.replace(/'/g, "''")}'
+category: '${categoryArg}'
+tags: []
 pubDate: '${pubDate}'
 draft: true
 ---
