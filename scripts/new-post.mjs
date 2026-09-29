@@ -54,6 +54,7 @@ title: '${titleArg.replace(/'/g, "''")}'
 description: ''
 author: '${author.replace(/'/g, "''")}'
 pubDate: '${pubDate}'
+draft: true
 ---
 
 `;
@@ -62,3 +63,4 @@ mkdirSync(blogDir, { recursive: true });
 writeFileSync(filePath, frontmatter);
 
 console.log(`생성됨: ${filePath}`);
+console.log('draft: true로 생성되었습니다. 공개하려면 draft를 false로 변경하세요.');
