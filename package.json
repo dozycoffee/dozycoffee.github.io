@@ -9,7 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "node --test src/plugins/*.test.mjs",
+    "test": "node --test src/plugins/*.test.mjs scripts/*.test.mjs",
     "astro": "astro",
     "new-post": "node scripts/new-post.mjs"
   },

@@ -46,7 +46,10 @@ if (!author) {
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const articleDir = join(__dirname, '..', 'src', 'content', 'article');
+// NEW_POST_ROOT lets tests write somewhere other than the repo.
+const root = process.env.NEW_POST_ROOT ?? join(__dirname, '..');
+const articleDir = join(root, 'src', 'content', 'article');
+const imageDir = join(root, 'src', 'assets', 'article', slug);
 const filePath = join(articleDir, `${slug}.md`);
 
 if (existsSync(filePath)) {
@@ -63,13 +66,16 @@ author: '${author.replace(/'/g, "''")}'
 category: '${categoryArg}'
 tags: []
 pubDate: '${pubDate}'
+# heroImage: '../../assets/article/${slug}/thumbnail.webp'
 draft: true
 ---
 
 `;
 
 mkdirSync(articleDir, { recursive: true });
+mkdirSync(imageDir, { recursive: true });
 writeFileSync(filePath, frontmatter);
 
 console.log(`생성됨: ${filePath}`);
+console.log(`이미지 폴더: ${imageDir} (썸네일과 본문 이미지를 여기에 넣으세요)`);
 console.log('draft: true로 생성되었습니다. 공개하려면 draft를 false로 변경하세요.');
