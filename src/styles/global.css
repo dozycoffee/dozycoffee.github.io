@@ -382,3 +382,53 @@ hr {
 	--callout-fg: #c0392b;
 	--callout-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpolygon points=%227.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2%22/%3E%3Cpath d=%22m15 9-6 6%22/%3E%3Cpath d=%22m9 9 6 6%22/%3E%3C/svg%3E");
 }
+
+/* Page transitions between pages (native cross-document View Transitions; browsers without support navigate normally) */
+@view-transition {
+	navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 0.2s;
+}
+/* The active category tab slides to the newly selected tab. */
+.tab.active {
+	view-transition-name: active-tab;
+}
+::view-transition-group(active-tab) {
+	animation-duration: 0.35s;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* The article list fades out and the next one rises in when the category changes. */
+.list-wrapper {
+	view-transition-name: article-list;
+}
+::view-transition-old(article-list),
+::view-transition-new(article-list) {
+	mix-blend-mode: normal;
+}
+::view-transition-old(article-list) {
+	animation: article-list-out 0.2s ease-in both;
+}
+::view-transition-new(article-list) {
+	animation: article-list-in 0.35s ease-out 0.1s both;
+}
+@keyframes article-list-out {
+	to {
+		opacity: 0;
+		transform: translateY(-12px);
+	}
+}
+@keyframes article-list-in {
+	from {
+		opacity: 0;
+		transform: translateY(16px);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
+	}
+}
