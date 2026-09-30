@@ -13,10 +13,10 @@ Dozy Coffee 기술 블로그에 글을 쓰거나 코드를 수정하는 방법�
 2. 스캐폴드 스크립트로 새 글 파일 생성
 
    ```bash
-   npm run new-post -- "글 제목" "Tech|Project" "작성자 이름"
+   npm run new-post -- "글 제목" "Learn|Tech|Project" "작성자 이름"
    ```
 
-   `category`는 `Tech` 또는 `Project` 중 하나여야 합니다. `작성자 이름`을 생략하면 로컬 git 설정(`git config user.name`)이 자동으로 들어갑니다.
+   `category`는 `Learn`, `Tech`, `Project` 중 하나여야 합니다. `작성자 이름`을 생략하면 로컬 git 설정(`git config user.name`)이 자동으로 들어갑니다.
 
    `src/content/article/글-제목.md` 파일과 이미지 폴더 `src/assets/article/글-제목/`이 함께 생성됩니다. 글 파일은 아래처럼 만들어집니다.
 
@@ -80,7 +80,7 @@ heroImage: '../../assets/article/글-제목/thumbnail.webp'
 | `title`       | O                 | 글 제목                                                                 |
 | `description` | O                 | 목록/RSS/메타태그에 쓰이는 요약                                         |
 | `author`      | O                 | 작성자 표시 이름 (자유 문자열)                                          |
-| `category`    | O                 | `Tech` 또는 `Project` 중 하나. 홈 화면 카테고리 탭 필터에 쓰임          |
+| `category`    | O                 | `Learn`, `Tech`, `Project` 중 하나. 홈 화면 카테고리 탭에 쓰임          |
 | `tags`        | X (기본값 `[]`)   | 자유 태그 배열. 목록 카드에는 최대 3개까지만 노출                      |
 | `pubDate`     | O                 | 발행일. `'YYYY-MM-DD'` 형식 권장                                        |
 | `updatedDate` | X                 | 수정일. 있으면 상세 페이지에 "Last updated on" 표시                     |

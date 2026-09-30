@@ -33,6 +33,17 @@ test('creates the post file and its image folder', () => {
 	}
 });
 
+test('accepts the Learn category', () => {
+	const root = mkdtempSync(join(tmpdir(), 'new-post-'));
+	try {
+		run(root, '배운 것', 'Learn', '작성자');
+		const content = readFileSync(join(root, 'src/content/article/배운-것.md'), 'utf8');
+		assert.match(content, /category: 'Learn'/);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test('refuses to overwrite an existing post', () => {
 	const root = mkdtempSync(join(tmpdir(), 'new-post-'));
 	try {

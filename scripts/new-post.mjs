@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-// npm run new-post -- "포스트 제목" "Tech|Project" ["작성자"]
+// npm run new-post -- "포스트 제목" "Learn|Tech|Project" ["작성자"]
 import { execSync } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const CATEGORIES = ['Tech', 'Project'];
+const CATEGORIES = ['Learn', 'Tech', 'Project'];
 
 const [, , titleArg, categoryArg, authorArg] = process.argv;
 
 if (!titleArg || !categoryArg) {
-	console.error('사용법: npm run new-post -- "포스트 제목" "Tech|Project" ["작성자"]');
+	console.error('사용법: npm run new-post -- "포스트 제목" "Learn|Tech|Project" ["작성자"]');
 	process.exit(1);
 }
 
