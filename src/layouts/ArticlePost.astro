@@ -1,4 +1,5 @@
 ---
+import 'katex/dist/katex.min.css';
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
@@ -172,6 +173,11 @@ const { title, description, author, category, pubDate, updatedDate, heroImage } 
 			}
 			.prose :global(blockquote > :last-child) {
 				margin-bottom: 0;
+			}
+			/* Math (KaTeX) */
+			.prose :global(.katex-display) {
+				margin: 0 0 2em;
+				overflow: auto hidden;
 			}
 			/* Horizontal rule */
 			.prose > :global(hr) {

@@ -5,6 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import { satteri } from '@astrojs/markdown-satteri';
 import callout from './src/plugins/remark-callout.mjs';
+import math from './src/plugins/math.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -12,6 +13,9 @@ export default defineConfig({
 	integrations: [mdx(), sitemap()],
 	markdown: {
 		shikiConfig: { theme: 'github-light' },
-		processor: satteri({ mdastPlugins: [callout] }),
+		processor: satteri({
+			features: { math: true },
+			mdastPlugins: [callout, math],
+		}),
 	},
 });
