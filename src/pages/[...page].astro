@@ -74,7 +74,7 @@ const pageNumbers = Array.from({ length: page.lastPage }, (_, i) => i + 1);
 				color: white;
 			}
 			.list-wrapper {
-				position: relative;
+				min-height: 28rem;
 			}
 			ul {
 				display: flex;
@@ -88,10 +88,8 @@ const pageNumbers = Array.from({ length: page.lastPage }, (_, i) => i + 1);
 				display: none;
 			}
 			.empty-message {
-				position: absolute;
-				top: 3rem;
-				left: 0;
-				right: 0;
+				margin: 0;
+				padding: 3rem 0;
 				text-align: center;
 				color: rgb(var(--gray));
 				font-size: 15px;
@@ -189,12 +187,7 @@ const pageNumbers = Array.from({ length: page.lastPage }, (_, i) => i + 1);
 			const tabs = document.querySelectorAll<HTMLButtonElement>('#category-tabs .tab');
 			const items = document.querySelectorAll<HTMLLIElement>('#article-list > li');
 			const indicator = document.getElementById('tab-indicator');
-			const listWrapper = document.getElementById('list-wrapper');
 			const emptyMessage = document.getElementById('empty-message');
-
-			if (listWrapper) {
-				listWrapper.style.minHeight = `${listWrapper.offsetHeight}px`;
-			}
 
 			const moveIndicator = (tab: HTMLButtonElement) => {
 				if (!indicator) return;
