@@ -46,8 +46,8 @@ if (!author) {
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const blogDir = join(__dirname, '..', 'src', 'content', 'blog');
-const filePath = join(blogDir, `${slug}.md`);
+const articleDir = join(__dirname, '..', 'src', 'content', 'article');
+const filePath = join(articleDir, `${slug}.md`);
 
 if (existsSync(filePath)) {
 	console.error(`이미 같은 이름의 글이 존재합니다: ${filePath}`);
@@ -68,7 +68,7 @@ draft: true
 
 `;
 
-mkdirSync(blogDir, { recursive: true });
+mkdirSync(articleDir, { recursive: true });
 writeFileSync(filePath, frontmatter);
 
 console.log(`생성됨: ${filePath}`);

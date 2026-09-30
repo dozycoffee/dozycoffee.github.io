@@ -18,7 +18,7 @@ Dozy Coffee 기술 블로그에 글을 쓰거나 코드를 수정하는 방법�
 
    `category`는 `Tech` 또는 `Project` 중 하나여야 합니다. `작성자 이름`을 생략하면 로컬 git 설정(`git config user.name`)이 자동으로 들어갑니다.
 
-   `src/content/blog/글-제목.md` 파일이 아래처럼 생성됩니다.
+   `src/content/article/글-제목.md` 파일이 아래처럼 생성됩니다.
 
    ```md
    ---

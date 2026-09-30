@@ -5,7 +5,7 @@ import DefaultThumbnail from '../assets/default-thumbnail.webp';
 import FormattedDate from './FormattedDate.astro';
 
 interface Props {
-	post: CollectionEntry<'blog'>;
+	post: CollectionEntry<'article'>;
 }
 
 const { post } = Astro.props;
@@ -13,7 +13,7 @@ const { title, description, author, category, tags, pubDate, heroImage } = post.
 const visibleTags = tags.slice(0, 3);
 ---
 
-<a class="card" href={`/blog/${post.id}/`} data-category={category}>
+<a class="card" href={`/article/${post.id}/`} data-category={category}>
 	<div class="thumbnail">
 		<Image width={480} height={340} src={heroImage ?? DefaultThumbnail} alt="" />
 	</div>

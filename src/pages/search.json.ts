@@ -5,12 +5,12 @@ import DefaultThumbnail from '../assets/default-thumbnail.webp';
 
 export const GET: APIRoute = async () => {
 	const posts = (
-		await getCollection('blog', ({ data }) => import.meta.env.DEV || !data.draft)
+		await getCollection('article', ({ data }) => import.meta.env.DEV || !data.draft)
 	).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 	const index = await Promise.all(
 		posts.map(async ({ id, data }) => ({
-			url: `/blog/${id}/`,
+			url: `/article/${id}/`,
 			thumbnail: (
 				await getImage({ src: data.heroImage ?? DefaultThumbnail, width: 240, height: 136 })
 			).src,
