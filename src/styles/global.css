@@ -101,19 +101,42 @@ input {
 table {
 	width: 100%;
 }
-img {
-	max-width: 100%;
-	height: auto;
-	border-radius: 8px;
-}
 code {
-	padding: 2px 5px;
-	background-color: rgb(var(--gray-light));
-	border-radius: 2px;
+	padding: 0.15em 0.4em;
+	background-color: var(--accent-light);
+	color: var(--accent-dark);
+	border-radius: 4px;
+	font-family:
+		ui-monospace,
+		SFMono-Regular,
+		Menlo,
+		Consolas,
+		'Pretendard Variable',
+		Pretendard,
+		'Apple SD Gothic Neo',
+		'Noto Sans KR',
+		monospace;
+	font-size: 0.85em;
 }
 pre {
-	padding: 1.5em;
+	margin: 0 0 2em;
+	border: 1px solid rgb(var(--gray-light));
+	/* Override the theme's inline background so the block stands out on the white page. */
+	background-color: #f8f9fa !important;
+	padding: 1.25em 1.5em;
 	border-radius: 8px;
+	font-family:
+		ui-monospace,
+		SFMono-Regular,
+		Menlo,
+		Consolas,
+		'Pretendard Variable',
+		Pretendard,
+		'Apple SD Gothic Neo',
+		'Noto Sans KR',
+		monospace;
+	font-size: 14px;
+	line-height: 1.6;
 }
 pre > code {
 	all: unset;
@@ -166,3 +189,4 @@ hr {
 	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
 	white-space: nowrap;
 }
+

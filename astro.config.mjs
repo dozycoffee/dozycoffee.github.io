@@ -8,4 +8,7 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
 	site: 'https://dozycoffee.github.io',
 	integrations: [mdx(), sitemap()],
+	markdown: {
+		shikiConfig: { theme: 'github-light' },
+	},
 });
