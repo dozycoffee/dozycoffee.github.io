@@ -321,5 +321,91 @@ const { title, description, author, category, pubDate, updatedDate, heroImage } 
 			</article>
 		</main>
 		<Footer />
+		<script>
+			const COPY_ICON =
+				'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>';
+			const CHECK_ICON =
+				'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg>';
+
+			// Click-to-zoom viewer for images in the article body.
+			const viewer = document.createElement('dialog');
+			viewer.className = 'image-viewer';
+			viewer.setAttribute('aria-label', '이미지 크게 보기');
+			const viewerImage = document.createElement('img');
+			viewer.append(viewerImage);
+			document.body.append(viewer);
+
+			function closeViewer() {
+				if (viewer.classList.contains('closing')) return;
+				viewer.classList.add('closing');
+				if (getComputedStyle(viewer).animationName === 'none') {
+					viewer.dispatchEvent(new Event('animationend'));
+				}
+			}
+			viewer.addEventListener('animationend', (e) => {
+				if (e.target !== viewer || !viewer.classList.contains('closing')) return;
+				viewer.classList.remove('closing');
+				viewer.close();
+			});
+			viewer.addEventListener('cancel', (e) => {
+				e.preventDefault();
+				closeViewer();
+			});
+			viewer.addEventListener('click', closeViewer);
+
+			document.querySelectorAll<HTMLImageElement>('.prose img').forEach((img) => {
+				if (img.closest('a')) return;
+				img.addEventListener('click', () => {
+					viewerImage.src = img.currentSrc || img.src;
+					viewerImage.alt = img.alt;
+					viewer.showModal();
+				});
+			});
+
+			document.querySelectorAll<HTMLTableElement>('.prose table').forEach((table) => {
+				const wrapper = document.createElement('div');
+				wrapper.className = 'table-wrapper';
+				table.replaceWith(wrapper);
+				wrapper.append(table);
+			});
+
+			document.querySelectorAll<HTMLPreElement>('.prose pre[data-language]').forEach((pre) => {
+				const language = pre.dataset.language;
+				const wrapper = document.createElement('div');
+				wrapper.className = 'code-block';
+
+				const header = document.createElement('div');
+				header.className = 'code-header';
+				const label = document.createElement('span');
+				label.textContent = !language || language === 'plaintext' ? 'text' : language;
+				const button = document.createElement('button');
+				button.type = 'button';
+				button.className = 'code-copy';
+				button.setAttribute('aria-label', '코드 복사');
+				button.innerHTML = COPY_ICON;
+				header.append(label, button);
+
+				pre.replaceWith(wrapper);
+				wrapper.append(header, pre);
+
+				let timer: number | undefined;
+				button.addEventListener('click', async () => {
+					try {
+						await navigator.clipboard.writeText((pre.textContent ?? '').replace(/\n$/, ''));
+						button.innerHTML = CHECK_ICON;
+						button.setAttribute('aria-label', '복사됨');
+						button.classList.add('copied');
+					} catch {
+						button.setAttribute('aria-label', '복사 실패');
+					}
+					clearTimeout(timer);
+					timer = window.setTimeout(() => {
+						button.innerHTML = COPY_ICON;
+						button.setAttribute('aria-label', '코드 복사');
+						button.classList.remove('copied');
+					}, 1500);
+				});
+			});
+		</script>
 	</body>
 </html>

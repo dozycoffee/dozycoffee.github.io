@@ -101,6 +101,39 @@ input {
 table {
 	width: 100%;
 }
+/* Article tables: the layout script wraps each one in .table-wrapper for horizontal scrolling */
+.table-wrapper {
+	margin: 0 0 2em;
+	overflow-x: auto;
+	border: 1px solid #e5e8eb;
+	border-radius: 8px;
+}
+.table-wrapper table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 15px;
+	line-height: 1.6;
+}
+.table-wrapper th,
+.table-wrapper td {
+	padding: 0.75em 1em;
+	text-align: left;
+	vertical-align: top;
+}
+.table-wrapper th {
+	background: rgb(var(--gray-light));
+	color: rgb(var(--black));
+	font-weight: 600;
+	white-space: nowrap;
+}
+.table-wrapper td {
+	border-top: 1px solid #e5e8eb;
+}
+img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 8px;
+}
 code {
 	padding: 0.15em 0.4em;
 	background-color: var(--accent-light);
@@ -140,6 +173,56 @@ pre {
 }
 pre > code {
 	all: unset;
+}
+/* Code block wrapper injected by the article layout: language label + copy button */
+.code-block {
+	margin: 0 0 2em;
+}
+.code-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 40px;
+	padding: 0 0.5em 0 1.5em;
+	border: 1px solid rgb(var(--gray-light));
+	border-bottom: none;
+	border-radius: 8px 8px 0 0;
+	background: rgb(var(--gray-light));
+	color: rgb(var(--gray));
+	font-family:
+		ui-monospace,
+		SFMono-Regular,
+		Menlo,
+		Consolas,
+		monospace;
+	font-size: 13px;
+	line-height: 1;
+}
+.code-copy {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: none;
+	border-radius: 6px;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+	transition: 0.2s ease;
+}
+.code-copy:hover {
+	background: white;
+	color: var(--accent);
+}
+.code-copy.copied {
+	color: var(--accent);
+}
+.code-block > pre {
+	margin: 0;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
 }
 blockquote {
 	border-left: 4px solid var(--accent);
@@ -188,5 +271,56 @@ hr {
 	clip-path: inset(50%);
 	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
 	white-space: nowrap;
+}
+
+/* Click-to-zoom image viewer (created by the article layout script) */
+.prose img:not(a img) {
+	cursor: zoom-in;
+}
+.image-viewer {
+	max-width: 100vw;
+	max-height: 100vh;
+	margin: auto;
+	padding: 0;
+	border: none;
+	background: transparent;
+	overflow: visible;
+}
+.image-viewer::backdrop {
+	background: rgba(var(--black), 80%);
+}
+.image-viewer img {
+	display: block;
+	max-width: 92vw;
+	max-height: 92vh;
+	border-radius: 8px;
+	object-fit: contain;
+	cursor: zoom-out;
+}
+.image-viewer[open],
+.image-viewer[open]::backdrop {
+	animation: image-viewer-in 0.2s ease-out;
+}
+.image-viewer.closing,
+.image-viewer.closing::backdrop {
+	animation: image-viewer-out 0.15s ease-in forwards;
+}
+@keyframes image-viewer-in {
+	from {
+		opacity: 0;
+	}
+}
+@keyframes image-viewer-out {
+	to {
+		opacity: 0;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.image-viewer[open],
+	.image-viewer[open]::backdrop,
+	.image-viewer.closing,
+	.image-viewer.closing::backdrop {
+		animation: none;
+	}
 }
 
