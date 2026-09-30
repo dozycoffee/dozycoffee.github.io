@@ -1,6 +1,7 @@
 ---
 import 'katex/dist/katex.min.css';
 import { Image } from 'astro:assets';
+import type { MarkdownHeading } from 'astro';
 import type { CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import DefaultThumbnail from '../assets/default-thumbnail.webp';
@@ -9,9 +10,17 @@ import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import { SITE_TITLE } from '../consts';
 
-type Props = CollectionEntry<'article'>['data'];
+type Props = CollectionEntry<'article'>['data'] & {
+	/** Headings of the article body, as returned by `render()`. */
+	headings?: MarkdownHeading[];
+};
 
-const { title, description, author, category, pubDate, updatedDate, heroImage } = Astro.props;
+const { title, description, author, category, pubDate, updatedDate, heroImage, headings = [] } =
+	Astro.props;
+
+// The table of contents lists h1-h3 of the body only.
+const tocHeadings = headings.filter((heading) => heading.depth <= 3);
+const tocBaseDepth = Math.min(...tocHeadings.map((heading) => heading.depth));
 ---
 
 <html lang="ko">
@@ -45,6 +54,7 @@ const { title, description, author, category, pubDate, updatedDate, heroImage } 
 				box-shadow: var(--box-shadow);
 			}
 			.prose {
+				position: relative;
 				width: 720px;
 				max-width: calc(100% - 2em);
 				margin: auto;
@@ -83,6 +93,62 @@ const { title, description, author, category, pubDate, updatedDate, heroImage } 
 			.meta > * + *::before {
 				content: '·';
 				margin: 0 0.5rem;
+			}
+			/* Table of contents: floats in the empty space to the right of the article */
+			.toc-rail {
+				display: none;
+			}
+			.prose > :global(h1),
+			.prose > :global(h2),
+			.prose > :global(h3) {
+				scroll-margin-top: 6rem;
+			}
+			@media (min-width: 1280px) {
+				.toc-rail {
+					position: absolute;
+					top: 0;
+					bottom: 0;
+					left: calc(100% + 1.5rem);
+					display: block;
+					width: 220px;
+					padding-top: 4rem;
+				}
+				.toc {
+					position: sticky;
+					top: 8rem;
+					max-height: calc(100vh - 10rem);
+					overflow-y: auto;
+					font-size: 14px;
+					line-height: 1.5;
+				}
+				.toc-title {
+					margin: 0 0 0.75rem;
+					color: rgb(var(--black));
+					font-weight: 600;
+				}
+				.toc ul {
+					margin: 0;
+					padding: 0;
+					border-left: 2px solid rgb(var(--gray-light));
+					list-style: none;
+				}
+				.toc a {
+					display: block;
+					margin-left: -2px;
+					padding: 0.3em 0.5em 0.3em calc(0.9em + var(--depth) * 0.9em);
+					border-left: 2px solid transparent;
+					color: rgb(var(--gray));
+					text-decoration: none;
+					transition: 0.2s ease;
+				}
+				.toc a:hover {
+					color: rgb(var(--gray-dark));
+				}
+				.toc a.active {
+					border-left-color: var(--accent);
+					color: var(--accent);
+					font-weight: 600;
+				}
 			}
 			/* Headings inside the article body (the page title above is a separate h1). */
 			.prose > :global(h1),
@@ -321,6 +387,22 @@ const { title, description, author, category, pubDate, updatedDate, heroImage } 
 					<Image width={1020} height={510} src={heroImage ?? DefaultThumbnail} alt="" />
 				</div>
 				<div class="prose">
+					{tocHeadings.length > 0 && (
+						<aside class="toc-rail">
+							<nav class="toc" aria-label="목차">
+								<p class="toc-title">목차</p>
+								<ul>
+									{tocHeadings.map((heading) => (
+										<li style={`--depth: ${heading.depth - tocBaseDepth}`}>
+											<a href={`#${heading.slug}`} data-id={heading.slug}>
+												{heading.text}
+											</a>
+										</li>
+									))}
+								</ul>
+							</nav>
+						</aside>
+					)}
 					<div class="title">
 						<p class="category">{category}</p>
 						<h1>{title}</h1>
@@ -341,6 +423,98 @@ const { title, description, author, category, pubDate, updatedDate, heroImage } 
 				'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>';
 			const CHECK_ICON =
 				'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg>';
+
+			// Highlight the table-of-contents entry of the section being read.
+			const tocLinks = [...document.querySelectorAll<HTMLAnchorElement>('.toc a')];
+			if (tocLinks.length > 0) {
+				const sections = tocLinks.map((link) => document.getElementById(link.dataset.id ?? ''));
+				let ticking = false;
+				// Set when an entry is clicked: the page may be unable to scroll far enough to
+				// bring a short section to the threshold, so keep the clicked entry highlighted
+				// until the reader scrolls by themselves.
+				let lockedIndex = -1;
+
+				const highlight = (index: number) =>
+					tocLinks.forEach((link, i) => link.classList.toggle('active', i === index));
+
+				const update = () => {
+					ticking = false;
+					if (lockedIndex >= 0) return highlight(lockedIndex);
+					let current = -1;
+					sections.forEach((section, i) => {
+						if (section && section.getBoundingClientRect().top <= 120) current = i;
+					});
+					// At the very bottom the last section can't scroll up to the threshold.
+					const atBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight - 2;
+					if (atBottom) current = sections.length - 1;
+					highlight(current);
+				};
+
+				const schedule = () => {
+					if (!ticking) {
+						ticking = true;
+						requestAnimationFrame(update);
+					}
+				};
+				const unlock = () => {
+					if (lockedIndex < 0) return;
+					lockedIndex = -1;
+					schedule();
+				};
+
+				// Eased scrolling: the browser's built-in smooth scroll has a fixed, abrupt curve.
+				const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+				const easeInOutCubic = (t: number) =>
+					t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+				let frame = 0;
+				const stopScrolling = () => cancelAnimationFrame(frame);
+				const scrollToSection = (section: HTMLElement) => {
+					stopScrolling();
+					const offset = parseFloat(getComputedStyle(section).scrollMarginTop) || 0;
+					const maxTop = document.documentElement.scrollHeight - window.innerHeight;
+					const from = window.scrollY;
+					const to = Math.min(Math.max(section.getBoundingClientRect().top + from - offset, 0), maxTop);
+					if (reducedMotion.matches || from === to) {
+						window.scrollTo({ top: to, behavior: 'instant' });
+						return;
+					}
+					const duration = Math.min(Math.max(Math.abs(to - from) * 0.8, 500), 1000);
+					const start = performance.now();
+					const step = (now: number) => {
+						const progress = Math.min((now - start) / duration, 1);
+						window.scrollTo({ top: from + (to - from) * easeInOutCubic(progress), behavior: 'instant' });
+						if (progress < 1) frame = requestAnimationFrame(step);
+					};
+					frame = requestAnimationFrame(step);
+				};
+
+				tocLinks.forEach((link, i) =>
+					link.addEventListener('click', (e) => {
+						const section = sections[i];
+						if (!section) return;
+						e.preventDefault();
+						history.replaceState(null, '', link.hash);
+						lockedIndex = i;
+						highlight(i);
+						scrollToSection(section);
+					}),
+				);
+				// Scrolling by hand stops the animation and hands control back to the scroll position.
+				// (Programmatic scrolling doesn't fire these events.)
+				const takeOver = () => {
+					stopScrolling();
+					unlock();
+				};
+				window.addEventListener('wheel', takeOver, { passive: true });
+				window.addEventListener('touchmove', takeOver, { passive: true });
+				window.addEventListener('keydown', (e) => {
+					if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(e.key)) {
+						takeOver();
+					}
+				});
+				window.addEventListener('scroll', schedule, { passive: true });
+				update();
+			}
 
 			// Click-to-zoom viewer for images in the article body.
 			const viewer = document.createElement('dialog');
