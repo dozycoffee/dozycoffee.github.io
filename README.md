@@ -1,63 +1,61 @@
-# Astro Starter Kit: Blog
+# 도지커피 기술블로그
 
-```sh
-npm create astro@latest -- --template blog
+도지커피 팀이 개발하며 배우고 고민한 내용을 기록하는 기술 블로그입니다.
+
+☕️ https://dozycoffee.github.io
+
+## 기술 스택
+
+- [Astro](https://astro.build) 7 (정적 사이트 생성)
+- Markdown / MDX 콘텐츠 (Sätteri 마크다운 처리기)
+- GitHub Actions + GitHub Pages 배포
+
+## 시작하기
+
+Node.js `>=22.12.0`이 필요합니다.
+
+```bash
+npm install
+npm run dev       # 개발 서버 (http://localhost:4321)
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+| 명령어             | 설명                                               |
+| ------------------ | -------------------------------------------------- |
+| `npm run dev`      | 개발 서버 실행. 초안(`draft: true`) 글도 함께 표시 |
+| `npm run build`    | 프로덕션 빌드 (`dist/`). 초안 글은 제외            |
+| `npm run preview`  | 빌드 결과 미리보기                                 |
+| `npm test`         | 플러그인, 글 생성 스크립트 테스트                  |
+| `npm run new-post` | 새 글과 이미지 폴더 생성                           |
 
-Features:
+## 글 쓰기
 
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and Open Graph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
+```bash
+npm run new-post -- "글 제목" "Learn|Tech|Project" "작성자 이름"
+```
 
-## 🚀 Project Structure
+글 파일은 `src/content/article/`, 이미지는 `src/assets/article/<글 파일명>/`에 생성됩니다. 작성 절차, frontmatter 필드, 이미지 규칙, 콜아웃 문법은 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고하세요.
 
-Inside of your Astro project, you'll see the following folders and files:
+## 프로젝트 구조
 
 ```text
-├── public/
+├── public/               # 파비콘, 배너 등 그대로 서비스되는 정적 파일
+├── scripts/              # 글 생성 스크립트와 테스트
 ├── src/
-│   ├── assets/
-│   ├── components/
-│   ├── content/
-│   ├── layouts/
-│   └── pages/
-├── astro.config.mjs
-├── README.md
-├── package.json
-└── tsconfig.json
+│   ├── assets/           # 로고, 기본 썸네일, 글별 이미지 (빌드 시 최적화)
+│   ├── components/       # 헤더, 푸터, 글 카드 등
+│   ├── content/article/  # 글 (Markdown / MDX)
+│   ├── layouts/          # 글 상세, 글 목록 레이아웃
+│   ├── pages/            # 라우트 (홈, 카테고리, 글 상세, RSS, 검색 인덱스 등)
+│   ├── plugins/          # 마크다운 플러그인 (콜아웃, 수식)과 테스트
+│   ├── styles/           # 전역 스타일
+│   └── consts.ts         # 사이트 제목, 카테고리 목록
+└── astro.config.mjs
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 배포
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+`main` 브랜치에 머지되면 GitHub Actions가 빌드해서 GitHub Pages로 자동 배포합니다. PR에서는 테스트와 빌드가 실행되며, 통과해야 머지할 수 있습니다.
 
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/article/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
+## 기여하기
 
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-
-## Credit
-
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+글 작성, 코드 변경 모두 PR로 진행합니다. 자세한 방법은 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고하세요.
