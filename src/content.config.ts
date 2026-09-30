@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { CATEGORIES } from './consts';
 
 const article = defineCollection({
 	// Load Markdown and MDX files in the `src/content/article/` directory.
@@ -11,7 +12,7 @@ const article = defineCollection({
 			title: z.string(),
 			description: z.string(),
 			author: z.string(),
-			category: z.enum(['Tech', 'Project']),
+			category: z.enum(CATEGORIES),
 			tags: z.array(z.string()).default([]),
 			// Transform string to Date object
 			pubDate: z.coerce.date(),

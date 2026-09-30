@@ -1,0 +1,23 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection } from 'astro:content';
+import ArticleList from '../../../layouts/ArticleList.astro';
+import { CATEGORIES } from '../../../consts';
+
+export const getStaticPaths = (async ({ paginate }) => {
+	const posts = (
+		await getCollection('article', ({ data }) => import.meta.env.DEV || !data.draft)
+	).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+	return CATEGORIES.flatMap((category) =>
+		paginate(
+			posts.filter((post) => post.data.category === category),
+			{ pageSize: 6, params: { category: category.toLowerCase() }, props: { category } },
+		),
+	);
+}) satisfies GetStaticPaths;
+
+const { page, category } = Astro.props;
+---
+
+<ArticleList page={page} category={category} />

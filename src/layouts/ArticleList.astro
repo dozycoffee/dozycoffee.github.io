@@ -1,0 +1,182 @@
+---
+import type { Page } from 'astro';
+import type { CollectionEntry } from 'astro:content';
+import ArticleListCard from '../components/ArticleListCard.astro';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { CATEGORIES, SITE_DESCRIPTION, SITE_TITLE, categoryPath } from '../consts';
+
+interface Props {
+	page: Page<CollectionEntry<'article'>>;
+	/** Active category tab; omit for the "All" list at the site root. */
+	category?: (typeof CATEGORIES)[number];
+}
+
+const { page, category } = Astro.props;
+
+// Base path of this list, used to build the pagination links.
+const basePath = category ? categoryPath(category) : '/';
+const pagePath = (n: number) => (n === 1 ? basePath : `${basePath}${n}`);
+const pageNumbers = Array.from({ length: page.lastPage }, (_, i) => i + 1);
+const tabs = [
+	{ label: 'All', href: '/', active: !category },
+	...CATEGORIES.map((c) => ({ label: c, href: categoryPath(c), active: c === category })),
+];
+---
+
+<!doctype html>
+<html lang="ko">
+	<head>
+		<BaseHead title={category ? `${category} | ${SITE_TITLE}` : SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			.banner {
+				width: 100%;
+				height: 280px;
+				object-fit: cover;
+				display: block;
+			}
+			main {
+				width: 960px;
+				padding-top: 2.5em;
+			}
+			.tabs {
+				display: flex;
+				gap: 0.75rem;
+				margin-bottom: 2rem;
+				padding-bottom: 1.5rem;
+				border-bottom: 1px solid rgb(var(--gray-light));
+			}
+			.tab {
+				padding: 0.5em 1.25em;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 100px;
+				background: white;
+				color: rgb(var(--gray-dark));
+				font-size: 15px;
+				font-weight: 600;
+				text-decoration: none;
+				transition: 0.2s ease;
+			}
+			.tab:not(.active):hover {
+				border-color: var(--accent);
+				color: var(--accent);
+			}
+			.tab.active {
+				background: var(--accent);
+				border-color: var(--accent);
+				color: white;
+			}
+			.list-wrapper {
+				min-height: 28rem;
+			}
+			ul {
+				display: flex;
+				flex-direction: column;
+				gap: 1.5rem;
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+			}
+			.empty-message {
+				margin: 0;
+				padding: 3rem 0;
+				text-align: center;
+				color: rgb(var(--gray));
+				font-size: 15px;
+			}
+			.pagination {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.5rem;
+				margin-top: 3rem;
+			}
+			.pagination a,
+			.pagination span {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				min-width: 2.25em;
+				height: 2.25em;
+				padding: 0 0.5em;
+				border-radius: 8px;
+				text-decoration: none;
+				font-size: 15px;
+				color: rgb(var(--gray-dark));
+			}
+			.pagination a:hover {
+				background: rgb(var(--gray-light));
+			}
+			.pagination .current {
+				background: var(--accent);
+				color: white;
+				font-weight: 600;
+			}
+			.pagination .disabled {
+				color: rgb(var(--gray-light));
+			}
+			@media (max-width: 720px) {
+				.banner {
+					height: 160px;
+				}
+				main {
+					padding-top: 1.5em;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<img class="banner" src="/banner.webp" alt="" />
+		<main>
+			<nav class="tabs" aria-label="카테고리">
+				{tabs.map((tab) => (
+					<a
+						class="tab"
+						class:list={[{ active: tab.active }]}
+						href={tab.href}
+						aria-current={tab.active ? 'page' : undefined}
+					>
+						{tab.label}
+					</a>
+				))}
+			</nav>
+			<div class="list-wrapper">
+				{page.data.length > 0 ? (
+					<ul>
+						{page.data.map((post) => (
+							<li>
+								<ArticleListCard post={post} />
+							</li>
+						))}
+					</ul>
+				) : (
+					<p class="empty-message">이 카테고리에 글이 없습니다.</p>
+				)}
+			</div>
+			{page.lastPage > 1 && (
+				<nav class="pagination" aria-label="페이지 이동">
+					{page.url.prev ? (
+						<a href={page.url.prev}>이전</a>
+					) : (
+						<span class="disabled">이전</span>
+					)}
+					{pageNumbers.map((n) =>
+						n === page.currentPage ? (
+							<span class="current">{n}</span>
+						) : (
+							<a href={pagePath(n)}>{n}</a>
+						),
+					)}
+					{page.url.next ? (
+						<a href={page.url.next}>다음</a>
+					) : (
+						<span class="disabled">다음</span>
+					)}
+				</nav>
+			)}
+		</main>
+		<Footer />
+	</body>
+</html>
