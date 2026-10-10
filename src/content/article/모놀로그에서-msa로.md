@@ -6,7 +6,7 @@ category: "Learn"
 tags: ['MSA', '모놀리스', '시스템 설계', '분산 시스템']
 pubDate: "2026-10-10"
 heroImage: '../../assets/article/모놀로그에서-msa로/thumbnail.webp'
-draft: true
+draft: false
 ---
 
 # 도지는 왜 MSA를 선택했을까?
