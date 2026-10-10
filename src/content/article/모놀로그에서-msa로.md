@@ -3,7 +3,7 @@ title: "MSA를 선택한 이유"
 description: "WMS와 상품관리 서비스를 통합하면서 도지가 MSA를 선택한 이유와, 서비스 분리 과정에서 고려한 설계 문제를 정리했어요."
 author: "도윤혁"
 category: "Learn"
-tags: []
+tags: ['MSA', '모놀리스', '시스템 설계', '분산 시스템']
 pubDate: "2026-10-10"
 heroImage: '../../assets/article/모놀로그에서-msa로/thumbnail.webp'
 draft: true
